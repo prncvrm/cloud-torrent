@@ -96,6 +96,7 @@ func (s *Server) Run(version string) error {
 	//configure engine
 	c := engine.Config{
 		DownloadDirectory: "./downloads",
+		DownloadType: "others",
 		EnableUpload:      true,
 		AutoStart:         true,
 	}

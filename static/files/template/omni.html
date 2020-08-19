@@ -34,6 +34,14 @@
   </div>
 </div>
 
+<div class="omni ui fluid">
+  <select ng-click="clearError()" ng-model="inputs.type" ng-init="inputs.type=types[inputs.typeIdx].name"
+    style="width:100%;padding:8px;" class='ui selection dropdown'>
+    <div class="menu">
+      <option class="item" ng-repeat='x in types' ng-value={{x.name}} ng-disabled="{{x.disabled}}">{{x.name}}</option>
+    </div>
+  </select>
+</div>
 <!-- MAGNET FIELD ERROR -->
 <div ng-show="omnierr" class="ui error message">
   <p>{{omnierr}}</p>

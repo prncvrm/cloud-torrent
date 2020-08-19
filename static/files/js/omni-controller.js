@@ -9,16 +9,22 @@ app.controller("OmniController", function(
   $rootScope.omni = $scope;
   $scope.inputs = {
     omni: storage.tcOmni || "",
-    provider: storage.tcProvider || "tpb"
+    provider: storage.tcProvider || "tpb",
+    type: "Unknown",
+    typeIdx: storage.typeIdx || 0,
   };
   //edit fields
   $scope.edit = false;
   $scope.magnet = {
     trackers: [{ v: "" }]
   };
+  $scope.types = [{ name: "Select Content Type", disabled: true }, { name: 'movies', disabled: false }, { name: 'tvseries', disabled: false }, { name: 'porn', disabled: false }, { name: 'others', disabled: false }];
   $scope.providers = {};
   $scope.$watch("inputs.provider", function(p) {
     if (p) storage.tcProvider = p;
+    $scope.parse();
+  });
+  $scope.$watch("inputs.type", function (p) {
     $scope.parse();
   });
   //if unset, set to first provider
@@ -40,7 +46,7 @@ app.controller("OmniController", function(
   var parseMagnet = function(params) {
     $scope.mode.magnet = true;
     var m = window.queryString.parse(params);
-
+    
     if (!/^urn:btih:([A-Za-z0-9]+)$/.test(m.xt)) {
       $scope.omnierr = "Invalid Info Hash";
       return;
@@ -71,6 +77,13 @@ app.controller("OmniController", function(
   $scope.parse = function() {
     storage.tcOmni = $scope.inputs.omni;
     $scope.omnierr = null;
+    storage.typeIdx = function () {
+      for (var i = 0; i < $scope.types.length; i++) {
+        if ($scope.types[i].name === $scope.inputs.type)
+          return i;
+      }
+      return 0
+    }();
     //set all 3 to false,
     //one will set to be true
     $scope.mode = {
@@ -133,8 +146,17 @@ app.controller("OmniController", function(
       $scope.submitTorrent();
     }
   };
-
-  $scope.submitTorrent = function() {
+  var setPath = async function () {
+    var data = $rootScope.state.Config;
+    data.DownloadType = $scope.inputs.type;
+    var data = await api.configure(JSON.stringify(data))
+  }
+  $scope.submitTorrent = async function() {
+    if ($scope.inputs.type === 'Select Content Type') {
+      $scope.omnierr = "Select Content Type";
+      return
+    }
+    await setPath()
     if ($scope.mode.torrent) {
       api.url($scope.inputs.omni);
     } else if ($scope.mode.magnet) {
@@ -143,8 +165,14 @@ app.controller("OmniController", function(
       window.alert("UI Bug");
     }
   };
+  
+  $scope.submitSearch = async function() {
+    if ($scope.inputs.type === 'Select Content Type') {
+      $scope.omnierr = "Select Content Type";
+      return
+    }
+    await setPath()
 
-  $scope.submitSearch = function() {
     //lookup provider's origin
     var provider = $scope.state.SearchProviders[$scope.inputs.provider];
     if (!provider) return;
@@ -174,7 +202,12 @@ app.controller("OmniController", function(
       });
   };
 
-  $scope.submitSearchItem = function(result) {
+  $scope.submitSearchItem = async function(result) {
+    if ($scope.inputs.type === 'Select Content Type') {
+      $scope.omnierr = "Select Content Type";
+      return
+    }
+    await setPath()
     //if search item has magnet/torrent, download now!
     if (result.magnet) {
       api.magnet(result.magnet);

@@ -44,7 +44,7 @@ func (e *Engine) Configure(c Config) error {
 		DHTConfig: dht.ServerConfig{
 			StartingNodes: dht.GlobalBootstrapAddrs,
 		},
-		DataDir:    c.DownloadDirectory,
+		DataDir:    c.DownloadDirectory+"/"+c.DownloadType,
 		ListenAddr: "0.0.0.0:" + strconv.Itoa(c.IncomingPort),
 		NoUpload:   !c.EnableUpload,
 		Seed:       c.EnableSeeding,
