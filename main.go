@@ -3,13 +3,14 @@ package main
 import (
 	"log"
 
-	"github.com/jpillora/cloud-torrent/server"
+	"github.com/prncvrm/cloud-torrent/server"
 	"github.com/jpillora/opts"
 )
 
 var VERSION = "0.0.1-src" //set with ldflags
 
 func main() {
+	log.Println("here")
 	s := server.Server{
 		Title:      "Cloud Torrent",
 		Port:       3000,
